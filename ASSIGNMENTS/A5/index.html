@@ -1,0 +1,140 @@
+<html>
+
+<head>
+<meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width, maximum-scale=1.0">
+<script src='https://code.jquery.com/jquery-3.1.1.min.js'> </script>
+<!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+<!-- Optional theme -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+
+<!-- Latest compiled and minified JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+<style>
+
+
+h1{
+  text-align: center;
+}
+
+#list a{
+  display: block;
+  padding: 5px;
+  color: black;
+  min-height: 60px;
+}
+.mouse #list a:hover{
+  color: red;
+}
+.touch #list a:active{
+  color: red;
+}
+#list p{
+  display: block;
+  padding: 0px;
+  margin: 0px;
+  margin-left: 10px;
+}
+.thumb{
+  height: 60px;
+  width: 60px;
+  background-position: 50%;
+  background-size: cover;
+  float: left;
+  margin-right: 5px;
+}
+#list{
+  float:left;
+  left: 0px;
+  background: rgba(0,0,0,.1);
+  overflow-x: hidden;
+  overflow-y: auto;
+  }
+#list a{
+  text-decoration: none;
+}
+#detailsW{
+  float:left;
+  right: 0px;
+  width: calc(100% - 200px);
+  background: rgb(0,0,0);
+  color: white;
+  padding: 20px;
+}
+.active{
+  background-color: gold;
+}
+</style>
+  <script src='asyncReq.js'></script>
+  <script>
+    var isTouch = false;
+    function start(){
+      var ua = navigator.userAgent;
+      if(ua.indexOf("iPhone") >= 0 || ua.indexOf("iPad") >= 0 || ua.indexOf("Android") >= 0){
+        isTouch = true;
+      }
+      if(isTouch){
+        $("body").addClass("touch");
+      }
+      else{
+        $("body").addClass("mouse");
+      }
+    }
+    function itemSelected(index){
+      var markup = "<h2>" + rssData[index]["im:name"].label + "</h2>";
+      markup += "<p>" + rssData[index].summary.label + "</p>";
+      document.getElementById("details").innerHTML = markup;
+      $("#list a").removeClass('active');
+      $("#list a:nth-of-type(" + (index+1) + ")").addClass('active');
+      if($(window).innerWidth() <= 500){
+         $("#list").addClass("condHide");
+         $("#detailsW").removeClass("condHide");
+      }
+    }
+    function goBack(){
+      $("#list").removeClass("hidden-xs");
+      $("#detailsW").addClass("visible-xs");
+      $("#list a").removeClass('active');
+    }
+    var rssData = [];
+    var filename = "./itunes.json";
+    var callback = function(res){
+      var data = JSON.parse(res).feed.entry;
+      rssData = data;
+      var markup = "";
+      for(var i = 0; i < data.length; i++){
+        var item = data[i];
+        var thumbURL = item["im:image"][0].label
+        markup += "<a href='javascript:itemSelected(" + i + ")'>"
+        + "<div class='thumb' style='background-image:url(" + thumbURL + ")'></div>"
+        + "<p>" + item["im:name"].label + "</p>"
+        + "<i>" + item["im:vendorName"].label + "</i>"
+         + "</a>";
+      }
+      document.getElementById("list").innerHTML = markup;
+      if($(window).innerWidth() > 500){
+        itemSelected(0);
+      }
+    }
+    loadFile(filename, callback);
+  </script>
+  <base href="http://subtlepatterns.com" >
+</head>
+
+<body onload='start()'>
+
+<h1> iTunes Top 100</h1>
+<div class="container-fluid">
+	 <div class="row">
+		<div id='list' class="col-lg-1 col-md-2 col-sm-2 col-xs-12"> </div>
+		<div class=" hidden-xs col-lg-15 col-md-22 col-sm-12" id='detailsW'> 
+		  <div id='details' class="col-lg-15 col-md-25 col-sm-22 "> </div>
+		</div>
+	</div>
+</div>
+</body>
+
+
+</html>
